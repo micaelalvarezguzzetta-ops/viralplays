@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamsGo — Impulsa tu música</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050508;
+    --dark: #0d0d14;
+    --card: #12121c;
+    --border: #1e1e30;
+    --green: #1DF286;
+    --purple: #9B5DE5;
+    --gold: #F4C430;
+    --red: #FF4B4B;
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 5%;
+    background: rgba(5,5,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .logo span { color: var(--green); }
+
+  .nav-cta {
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(29,242,134,0.4);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 5% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(29,242,134,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  .hero-glow-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(155,93,229,0.1) 0%, transparent 70%);
+    top: 30%; left: 20%;
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(29,242,134,0.08);
+    border: 1px solid rgba(29,242,134,0.25);
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    animation: fadeInDown 0.8s ease both;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 9vw, 7.5rem);
+    line-height: 0.95;
+    letter-spacing: 3px;
+    color: #fff;
+    animation: fadeInDown 0.8s 0.1s ease both;
+    margin-bottom: 8px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--green);
+    display: block;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 540px;
+    margin: 24px auto 40px;
+    line-height: 1.7;
+    animation: fadeInDown 0.8s 0.2s ease both;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInDown 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 16px 36px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(29,242,134,0.45);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 16px 36px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--muted);
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* ── PLATFORMS STRIP ── */
+  .platforms-strip {
+    padding: 30px 5%;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,0.015);
+  }
+
+  .platforms-strip span {
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .platform-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+
+  .tag-spotify { background: rgba(30,215,96,0.08); border-color: rgba(30,215,96,0.25); color: #1ED760; }
+  .tag-youtube { background: rgba(255,0,0,0.08); border-color: rgba(255,0,0,0.25); color: #FF4B4B; }
+  .tag-apple { background: rgba(250,90,130,0.08); border-color: rgba(250,90,130,0.25); color: #FA5A82; }
+
+  /* ── TRUST BAR ── */
+  .trust-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trust-item {
+    padding: 36px 28px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: background 0.2s;
+  }
+  .trust-item:last-child { border-right: none; }
+  .trust-item:hover { background: rgba(255,255,255,0.02); }
+
+  .trust-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .ti-green { background: rgba(29,242,134,0.1); }
+  .ti-purple { background: rgba(155,93,229,0.1); }
+  .ti-gold { background: rgba(244,196,48,0.1); }
+  .ti-red { background: rgba(255,75,75,0.1); }
+
+  .trust-text strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .trust-text p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── SECTION SHARED ── */
+  section { padding: 90px 5%; }
+
+  .section-label {
+    font-size: 0.72rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    letter-spacing: 2px;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .section-title span { color: var(--green); }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  /* ── PRICING ── */
+  .pricing-section { background: var(--dark); }
+
+  .platform-block { margin-bottom: 70px; }
+  .platform-block:last-child { margin-bottom: 0; }
+
+  .platform-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .platform-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .pi-spotify { background: rgba(30,215,96,0.12); border: 1px solid rgba(30,215,96,0.2); }
+  .pi-youtube { background: rgba(255,75,75,0.12); border: 1px solid rgba(255,75,75,0.2); }
+  .pi-apple { background: rgba(250,90,130,0.12); border: 1px solid rgba(250,90,130,0.2); }
+
+  .platform-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+  }
+
+  .plan-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    overflow: hidden;
+    cursor: default;
+  }
+  .plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .plan-card:hover { transform: translateY(-6px); }
+  .plan-card:hover::before { opacity: 1; }
+
+  /* Spotify green */
+  .sp .plan-card:hover { border-color: rgba(30,215,96,0.35); box-shadow: 0 12px 40px rgba(30,215,96,0.12); }
+  .sp .plan-card::before { background: #1ED760; }
+  /* YouTube red */
+  .yt .plan-card:hover { border-color: rgba(255,75,75,0.35); box-shadow: 0 12px 40px rgba(255,75,75,0.12); }
+  .yt .plan-card::before { background: #FF4B4B; }
+  /* Apple pink */
+  .ap .plan-card:hover { border-color: rgba(250,90,130,0.35); box-shadow: 0 12px 40px rgba(250,90,130,0.12); }
+  .ap .plan-card::before { background: #FA5A82; }
+
+  .plan-card.popular {
+    border-color: var(--green);
+    box-shadow: 0 0 30px rgba(29,242,134,0.1);
+  }
+  .plan-card.popular::before { opacity: 1; background: var(--green); }
+
+  .popular-badge {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--green);
+    color: #000;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .plan-streams {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .plan-unit {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .plan-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .plan-price sup { font-size: 1rem; padding-top: 6px; color: var(--muted); }
+
+  .plan-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .sp .plan-btn { background: rgba(30,215,96,0.12); color: #1ED760; border: 1px solid rgba(30,215,96,0.25); }
+  .sp .plan-btn:hover { background: #1ED760; color: #000; box-shadow: 0 4px 20px rgba(30,215,96,0.35); transform: translateY(-1px); }
+  .yt .plan-btn { background: rgba(255,75,75,0.12); color: #FF4B4B; border: 1px solid rgba(255,75,75,0.25); }
+  .yt .plan-btn:hover { background: #FF4B4B; color: #fff; box-shadow: 0 4px 20px rgba(255,75,75,0.35); transform: translateY(-1px); }
+  .ap .plan-btn { background: rgba(250,90,130,0.12); color: #FA5A82; border: 1px solid rgba(250,90,130,0.25); }
+  .ap .plan-btn:hover { background: #FA5A82; color: #fff; box-shadow: 0 4px 20px rgba(250,90,130,0.35); transform: translateY(-1px); }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--black); }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+
+  .step {
+    padding: 36px 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4.5rem;
+    line-height: 1;
+    color: rgba(255,255,255,0.04);
+    position: absolute;
+    top: 16px; right: 20px;
+    letter-spacing: 2px;
+  }
+
+  .step-icon {
+    width: 48px; height: 48px;
+    background: rgba(29,242,134,0.08);
+    border: 1px solid rgba(29,242,134,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .step h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .step p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── INFO BANNER ── */
+  .info-banner {
+    background: linear-gradient(135deg, rgba(29,242,134,0.06) 0%, rgba(155,93,229,0.06) 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 50px 48px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: center;
+    margin: 60px 5%;
+  }
+
+  .info-banner h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 14px;
+    line-height: 1.05;
+  }
+  .info-banner h2 span { color: var(--green); }
+
+  .info-points { display: flex; flex-direction: column; gap: 10px; }
+  .info-point {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .info-point::before {
+    content: '✓';
+    width: 22px; height: 22px;
+    background: rgba(29,242,134,0.12);
+    color: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* ── COUNTRIES ── */
+  .countries {
+    background: var(--dark);
+    text-align: center;
+  }
+
+  .flags-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+
+  .flag-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    min-width: 90px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .flag-card:hover { transform: translateY(-4px); border-color: rgba(29,242,134,0.3); }
+  .flag-card span:first-child { font-size: 2.2rem; }
+  .flag-card span:last-child { font-size: 0.72rem; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
+
+  /* ── FAQ / FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 50px 5% 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .footer-logo span { color: var(--green); }
+
+  footer p { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── CAPACITY BANNER ── */
+  .capacity-banner {
+    background: rgba(29,242,134,0.06);
+    border-bottom: 1px solid rgba(29,242,134,0.18);
+    padding: 14px 5%;
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .capacity-banner.full {
+    background: rgba(255,75,75,0.06);
+    border-bottom-color: rgba(255,75,75,0.2);
+  }
+
+  .capacity-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .capacity-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    white-space: nowrap;
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: rgba(29,242,134,0.1);
+    border: 1px solid rgba(29,242,134,0.25);
+    transition: all 0.4s;
+    flex-shrink: 0;
+  }
+  .capacity-banner.full .capacity-indicator {
+    color: #FF4B4B;
+    background: rgba(255,75,75,0.1);
+    border-color: rgba(255,75,75,0.25);
+  }
+
+  .capacity-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 1.4s ease-in-out infinite;
+    transition: background 0.4s;
+  }
+  .capacity-banner.full .capacity-dot {
+    background: #FF4B4B;
+    animation: none;
+  }
+
+  .capacity-banner p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+    flex: 1;
+    min-width: 200px;
+  }
+  .capacity-banner p strong { color: var(--text); }
+
+  .capacity-toggle {
+    font-size: 0.7rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--border);
+    background: none;
+    border: 1px dashed var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+  .capacity-toggle:hover { color: var(--muted); }
+
+  /* ── QUALITY BLOCK ── */
+  .quality-block {
+    padding: 70px 5%;
+    background: var(--black);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quality-inner { max-width: 1100px; margin: 0 auto; }
+
+  .quality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(244,196,48,0.08);
+    border: 1px solid rgba(244,196,48,0.2);
+    color: #F4C430;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .quality-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .quality-title span { color: var(--green); }
+
+  .quality-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 620px;
+    line-height: 1.75;
+    margin-bottom: 44px;
+  }
+  .quality-sub strong { color: var(--text); }
+
+  .quality-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .qcard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 28px;
+    transition: transform 0.25s, border-color 0.25s;
+  }
+  .qcard:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.1); }
+
+  .qcard-highlight {
+    background: linear-gradient(135deg, rgba(29,242,134,0.05) 0%, rgba(155,93,229,0.05) 100%);
+    border-color: rgba(29,242,134,0.2);
+  }
+  .qcard-highlight:hover { border-color: rgba(29,242,134,0.4); }
+
+  .qcard-icon { font-size: 2rem; margin-bottom: 16px; }
+
+  .qcard h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .qcard p {
+    font-size: 0.87rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .qcard p:last-child { margin-bottom: 0; }
+  .qcard p strong { color: var(--text); }
+
+  .qcard ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .qcard ul li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qcard ul li strong { color: var(--text); }
+
+  /* ── DISCOUNT / ROYALTY EXTRAS ── */
+  .plan-old-price {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: line-through;
+    margin-bottom: 2px;
+  }
+
+  .plan-discount-badge {
+    display: inline-block;
+    background: rgba(244,196,48,0.12);
+    border: 1px solid rgba(244,196,48,0.25);
+    color: #F4C430;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+
+  .plan-royalty-note {
+    font-size: 0.75rem;
+    color: var(--green);
+    background: rgba(29,242,134,0.06);
+    border: 1px solid rgba(29,242,134,0.15);
+    border-radius: 8px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    margin-bottom: 14px;
+  }
+
+  /* ── PACKS ── */
+  .packs-header {
+    padding: 60px 5% 10px;
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+  }
+
+  .packs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 30px 5% 80px;
+    background: var(--dark);
+  }
+
+  .pack-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 26px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  }
+  .pack-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.12); }
+
+  .pack-featured {
+    border-color: var(--green);
+    box-shadow: 0 0 40px rgba(29,242,134,0.1);
+    background: linear-gradient(160deg, rgba(29,242,134,0.04) 0%, var(--card) 50%);
+  }
+  .pack-featured:hover { box-shadow: 0 8px 50px rgba(29,242,134,0.2); }
+
+  .pack-pro {
+    border-color: rgba(155,93,229,0.35);
+    background: linear-gradient(160deg, rgba(155,93,229,0.05) 0%, var(--card) 50%);
+  }
+  .pack-pro:hover { border-color: rgba(155,93,229,0.6); box-shadow: 0 8px 40px rgba(155,93,229,0.15); }
+
+  .pack-best-badge {
+    position: absolute;
+    top: -13px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: #000;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .pack-tier {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+
+  .pack-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  .pack-includes {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 18px;
+  }
+
+  .pack-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 9px;
+    line-height: 1.4;
+  }
+  .sp-line { background: rgba(30,215,96,0.06); border: 1px solid rgba(30,215,96,0.12); }
+  .ap-line { background: rgba(250,90,130,0.06); border: 1px solid rgba(250,90,130,0.12); }
+  .yt-line { background: rgba(255,75,75,0.06); border: 1px solid rgba(255,75,75,0.12); }
+
+  .organic-tag {
+    display: inline-block;
+    background: rgba(30,215,96,0.12);
+    color: #1ED760;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    margin-left: 2px;
+  }
+
+  .pack-delivery {
+    font-size: 0.75rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .pack-price {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 18px;
+    margin-top: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .pack-price sup { font-size: 1rem; padding-top: 6px; color: var(--muted); }
+
+  .pack-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 13px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .pack-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+  .pack-btn-featured {
+    background: var(--green);
+    color: #000;
+    border-color: var(--green);
+  }
+  .pack-btn-featured:hover { box-shadow: 0 4px 20px rgba(29,242,134,0.4); background: var(--green); }
+
+  .pack-btn-pro {
+    background: rgba(155,93,229,0.15);
+    color: #9B5DE5;
+    border-color: rgba(155,93,229,0.3);
+  }
+  .pack-btn-pro:hover { background: #9B5DE5; color: #fff; box-shadow: 0 4px 20px rgba(155,93,229,0.4); }
+
+  /* ── PLATFORM INFO BARS ── */
+  .platform-info-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 0;
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-top: 16px;
+    font-size: 0.84rem;
+  }
+
+  .sp-bar { background: rgba(30,215,96,0.06); border: 1px solid rgba(30,215,96,0.15); }
+  .yt-bar { background: rgba(255,75,75,0.06); border: 1px solid rgba(255,75,75,0.15); }
+  .ap-bar { background: rgba(250,90,130,0.06); border: 1px solid rgba(250,90,130,0.15); }
+
+  .pib-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    padding: 0 16px;
+  }
+  .pib-item:first-child { padding-left: 0; }
+  .pib-item strong { color: var(--text); font-weight: 600; }
+
+  .pib-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 700px) {
+    .pib-sep { display: none; }
+    .pib-item { padding: 4px 0; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .info-banner { grid-template-columns: 1fr; }
+    .trust-bar { grid-template-columns: 1fr 1fr; }
+    .trust-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .trust-item:last-child { border-bottom: none; }
+  }
+
+  @media (max-width: 480px) {
+    .trust-bar { grid-template-columns: 1fr; }
+    .plans-grid { grid-template-columns: 1fr 1fr; }
+    .info-banner { padding: 36px 28px; margin: 40px 3%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">STREAMS<span>GO</span></div>
+  <a href="#pricing" class="nav-cta">Ver Precios →</a>
+</nav>
+
+<!-- CAPACITY BANNER -->
+<div class="capacity-banner" id="capacityBanner">
+  <div class="capacity-inner">
+    <div class="capacity-indicator" id="capacityIndicator">
+      <span class="capacity-dot" id="capacityDot"></span>
+      <span id="capacityStatus">PLAZAS LIBRES</span>
+    </div>
+    <p id="capacityMsg">Para garantizar la máxima calidad, limitamos los pedidos diarios. <strong>Ahora mismo hay plazas disponibles</strong> — puedes realizar tu pedido con total tranquilidad.</p>
+    <button class="capacity-toggle" onclick="toggleCapacity()">Simular cupo lleno</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🎵 Promoción musical real</div>
+    <h1>HAZ QUE TU <em>MÚSICA SUENE</em></h1>
+    <p class="hero-sub">Multiplica tus reproducciones en Spotify, YouTube y Apple Music con oyentes reales. Entrega rápida, sin bots, resultados garantizados.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary">🚀 Empezar ahora</a>
+      <a href="#how" class="btn-secondary">¿Cómo funciona?</a>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORMS STRIP -->
+<div class="platforms-strip">
+  <span>Disponible en</span>
+  <div class="platform-tag tag-spotify">🎵 Spotify</div>
+  <div class="platform-tag tag-youtube">▶ YouTube</div>
+  <div class="platform-tag tag-apple">🍎 Apple Music</div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar fade-in">
+  <div class="trust-item">
+    <div class="trust-icon ti-green">⚡</div>
+    <div class="trust-text">
+      <strong>Inicio en 1–24h</strong>
+      <p>Tu campaña arranca en menos de un día tras el pago</p>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon ti-purple">📅</div>
+    <div class="trust-text">
+      <strong>Entrega en 2–10 días</strong>
+      <p>Streams entregados de forma natural y progresiva</p>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon ti-gold">👤</div>
+    <div class="trust-text">
+      <strong>Oyentes 100% reales</strong>
+      <p>Personas reales de España, México, EEUU, Colombia y más</p>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon ti-red">🛡️</div>
+    <div class="trust-text">
+      <strong>Sin bots ni fraude</strong>
+      <p>Métodos seguros que no ponen en riesgo tu cuenta</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-label">Planes & Precios</div>
+  <div class="section-title">ELIGE TU <span>PLAN</span></div>
+  <div class="section-desc">Sin suscripciones. Pagas solo lo que necesitas. Pago 100% seguro con Stripe.</div>
+
+  <!-- SPOTIFY -->
+  <div class="platform-block sp fade-in">
+    <div class="platform-header">
+      <div class="platform-icon pi-spotify">🎵</div>
+      <div class="platform-name">SPOTIFY</div>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-streams">100</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-price"><sup>€</sup>2<span style="font-size:1rem;color:var(--muted)">,00</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-streams">500</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-old-price">Antes 10,00€</div>
+        <div class="plan-discount-badge">−31% dto</div>
+        <div class="plan-price"><sup>€</sup>6<span style="font-size:1rem;color:var(--muted)">,90</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card popular">
+        <div class="popular-badge">Popular</div>
+        <div class="plan-streams">1.000</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-old-price">Antes 20,00€</div>
+        <div class="plan-discount-badge">−45% dto</div>
+        <div class="plan-price"><sup>€</sup>10<span style="font-size:1rem;color:var(--muted)">,90</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-streams">5.000</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-price"><sup>€</sup>39<span style="font-size:1rem;color:var(--muted)">,90</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+    </div>
+    <div class="platform-info-bar sp-bar">
+      <div class="pib-item">👤 <span>Oyentes reales de <strong>España, México, Argentina, Colombia, Francia, EEUU</strong> y más</span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">📦 <span>Entrega progresiva por goteo — <strong>3 a 15 días</strong> según plan (no de golpe)</span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">🎧 <span>Retención completa de la canción</span></div>
+    </div>
+  </div>
+
+  <!-- YOUTUBE -->
+  <div class="platform-block yt fade-in">
+    <div class="platform-header">
+      <div class="platform-icon pi-youtube">▶</div>
+      <div class="platform-name">YOUTUBE</div>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-streams">100</div>
+        <div class="plan-unit">Reproducciones</div>
+        <div class="plan-price"><sup>€</sup>1<span style="font-size:1rem;color:var(--muted)">,00</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card popular">
+        <div class="popular-badge">Popular</div>
+        <div class="plan-streams">500</div>
+        <div class="plan-unit">Reproducciones</div>
+        <div class="plan-old-price">Antes 5,00€</div>
+        <div class="plan-discount-badge">−30% dto</div>
+        <div class="plan-price"><sup>€</sup>3<span style="font-size:1rem;color:var(--muted)">,50</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-streams">1.000</div>
+        <div class="plan-unit">Reproducciones</div>
+        <div class="plan-old-price">Antes 10,00€</div>
+        <div class="plan-discount-badge">−40% dto</div>
+        <div class="plan-price"><sup>€</sup>6<span style="font-size:1rem;color:var(--muted)">,00</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+    </div>
+    <div class="platform-info-bar yt-bar">
+      <div class="pib-item">👤 <span>Oyentes de <strong>España, México, Francia, EEUU, Canadá, Suiza</strong></span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">📦 <span>Entrega progresiva por goteo — <strong>3 a 20 días</strong> según plan (no de golpe)</span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">🎧 <span>Retención completa de la canción</span></div>
+    </div>
+  </div>
+
+  <!-- APPLE MUSIC -->
+  <div class="platform-block ap fade-in">
+    <div class="platform-header">
+      <div class="platform-icon pi-apple">🍎</div>
+      <div class="platform-name">APPLE MUSIC</div>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-streams">100</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-price"><sup>€</sup>1<span style="font-size:1rem;color:var(--muted)">,20</span></div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card">
+        <div class="plan-streams">500</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-price"><sup>€</sup>4<span style="font-size:1rem;color:var(--muted)">,00</span></div>
+        <div class="plan-royalty-note">💰 ~2% de beneficio neto estimado tras regalías</div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+      <div class="plan-card popular">
+        <div class="popular-badge">Popular</div>
+        <div class="plan-streams">1.000</div>
+        <div class="plan-unit">Streams</div>
+        <div class="plan-price"><sup>€</sup>7<span style="font-size:1rem;color:var(--muted)">,90</span></div>
+        <div class="plan-royalty-note">💰 ~4% de beneficio neto estimado tras regalías</div>
+        <a href="#" class="plan-btn">Comprar →</a>
+      </div>
+    </div>
+    <div class="platform-info-bar ap-bar">
+      <div class="pib-item">✅ <span>Cuentas <strong>100% reales</strong></span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">💰 <span>Regalías <strong>100% garantizadas</strong></span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">📦 <span>Entrega progresiva por goteo — <strong>3 a 30 días</strong> según plan</span></div>
+      <div class="pib-sep"></div>
+      <div class="pib-item">🌍 <span>Oyentes de <strong>EEUU, España, Colombia, Argentina, Chile, México, UK</strong></span></div>
+    </div>
+  </div>
+
+  <!-- PACKS -->
+  <div class="packs-header fade-in">
+    <div class="section-label" style="margin-bottom:10px">🔥 Mejor valor</div>
+    <div class="section-title" style="margin-bottom:10px">PACKS <span>COMBINADOS</span></div>
+    <p class="section-desc" style="margin-bottom:0">Las 3 plataformas a la vez. Máximo impacto, máximo ahorro.</p>
+  </div>
+
+  <div class="packs-grid fade-in">
+
+    <div class="pack-card">
+      <div class="pack-tier">Básico</div>
+      <div class="pack-name">PACK BÁSICO</div>
+      <div class="pack-includes">
+        <div class="pack-line sp-line"><span>🎵</span> 100 streams Spotify</div>
+        <div class="pack-line ap-line"><span>🍎</span> 100 streams Apple Music</div>
+        <div class="pack-line yt-line"><span>▶</span> 100 reprod. YouTube</div>
+      </div>
+      <div class="pack-delivery">📦 Entrega progresiva 3–7 días · Oyentes reales</div>
+      <div class="pack-price"><sup>€</sup>5,90</div>
+      <a href="#" class="pack-btn">Comprar pack →</a>
+    </div>
+
+    <div class="pack-card pack-featured">
+      <div class="pack-best-badge">⭐ Más popular</div>
+      <div class="pack-tier">Emergente</div>
+      <div class="pack-name">PACK EMERGENTE</div>
+      <div class="pack-includes">
+        <div class="pack-line sp-line"><span>🎵</span> 500 streams Spotify</div>
+        <div class="pack-line ap-line"><span>🍎</span> 250 streams Apple Music</div>
+        <div class="pack-line yt-line"><span>▶</span> 500 reprod. YouTube</div>
+      </div>
+      <div class="pack-delivery">📦 Entrega progresiva 5–15 días · Oyentes reales</div>
+      <div class="pack-price"><sup>€</sup>12,90</div>
+      <a href="#" class="pack-btn pack-btn-featured">Comprar pack →</a>
+    </div>
+
+    <div class="pack-card">
+      <div class="pack-tier">Plata</div>
+      <div class="pack-name">PACK PLATA</div>
+      <div class="pack-includes">
+        <div class="pack-line sp-line"><span>🎵</span> 1.000 streams Spotify <span class="organic-tag">playlists orgánicas</span></div>
+        <div class="pack-line ap-line"><span>🍎</span> 1.000 streams Apple Music</div>
+        <div class="pack-line yt-line"><span>▶</span> 1.000 reprod. YouTube</div>
+      </div>
+      <div class="pack-delivery">📦 Entrega progresiva 7–20 días · Oyentes reales</div>
+      <div class="pack-price"><sup>€</sup>24,95</div>
+      <a href="#" class="pack-btn">Comprar pack →</a>
+    </div>
+
+    <div class="pack-card pack-pro">
+      <div class="pack-tier">Pro</div>
+      <div class="pack-name">PACK PRO</div>
+      <div class="pack-includes">
+        <div class="pack-line sp-line"><span>🎵</span> 2.500 streams Spotify <span class="organic-tag">playlists orgánicas</span></div>
+        <div class="pack-line ap-line"><span>🍎</span> 2.000 streams Apple Music</div>
+        <div class="pack-line yt-line"><span>▶</span> 2.000 reprod. YouTube</div>
+      </div>
+      <div class="pack-delivery">📦 Entrega progresiva 10–30 días · Oyentes reales</div>
+      <div class="pack-price"><sup>€</sup>49,90</div>
+      <a href="#" class="pack-btn pack-btn-pro">Comprar pack →</a>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- QUALITY BLOCK -->
+<div class="quality-block fade-in">
+  <div class="quality-inner">
+    <div class="quality-badge">⭐ Lo que nos diferencia</div>
+    <h2 class="quality-title">RETENCIÓN COMPLETA <span>DE LA CANCIÓN</span></h2>
+    <p class="quality-sub">Escuchas reales de oyentes reales que escuchan tu canción <strong>entera</strong> — activando señales limpias al algoritmo para que la plataforma la impulse de forma orgánica.</p>
+
+    <div class="quality-grid">
+      <div class="qcard">
+        <div class="qcard-icon">💰</div>
+        <h3>Regalías 100% garantizadas</h3>
+        <p>Cobras en tu distribuidora. Tiempos orientativos de liquidación:</p>
+        <ul>
+          <li>🎵 Spotify — <strong>2 a 3 meses</strong></li>
+          <li>🍎 Apple Music — <strong>2 a 3 meses</strong></li>
+          <li>▶ YouTube — <strong>1 a 2 meses</strong></li>
+        </ul>
+      </div>
+      <div class="qcard">
+        <div class="qcard-icon">📈</div>
+        <h3>Señales limpias al algoritmo</h3>
+        <p>Cada escucha completa envía una señal positiva a las plataformas. Tu canción gana visibilidad real, no posicionamiento artificial.</p>
+      </div>
+      <div class="qcard qcard-highlight">
+        <div class="qcard-icon">🛡️</div>
+        <h3>Sin bots. Sin granjas. Sin riesgos.</h3>
+        <p>No usamos bots, granjas de dispositivos ni ningún método fraudulento que pueda poner en riesgo tu perfil o cuenta de artista. <strong>Eso es lo que nos diferencia del resto.</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INFO BANNER -->
+<div class="info-banner fade-in">
+  <div>
+    <h2>LO QUE HACEMOS <span>DIFERENTE</span></h2>
+    <div class="info-points">
+      <div class="info-point">Comienzo del servicio entre 1 y 24 horas tras el pago</div>
+      <div class="info-point">Duración de la entrega: 2 a 10 días de forma natural</div>
+      <div class="info-point">Cero bots — solo métodos orgánicos y seguros</div>
+      <div class="info-point">Oyentes reales de España, México, EEUU, Colombia y más</div>
+      <div class="info-point">Pago seguro con Stripe — tarjeta, Bizum y más</div>
+    </div>
+  </div>
+  <a href="#pricing" class="btn-primary" style="white-space: nowrap; font-size: 0.95rem;">Empezar ya →</a>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-label">Proceso</div>
+  <div class="section-title">EN 3 PASOS <span>SIMPLES</span></div>
+  <div class="section-desc">Sin complicaciones. Tu música suena en cuestión de horas.</div>
+  <div class="steps fade-in">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">🎯</div>
+      <h3>Elige tu plan</h3>
+      <p>Selecciona la plataforma y el paquete de streams que se ajuste a tus necesidades y presupuesto.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">💳</div>
+      <h3>Paga de forma segura</h3>
+      <p>Realizas el pago con Stripe, 100% seguro. Aceptamos tarjeta de crédito, débito y más métodos.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🚀</div>
+      <h3>Tu música despega</h3>
+      <p>En 1-24h tu campaña arranca. Los streams llegan de forma progresiva y natural en 2-10 días.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COUNTRIES -->
+<section class="countries fade-in">
+  <div class="section-label">Audiencia global</div>
+  <div class="section-title">OYENTES DE <span>TODO EL MUNDO</span></div>
+  <div class="flags-row">
+    <div class="flag-card"><span>🇪🇸</span><span>España</span></div>
+    <div class="flag-card"><span>🇲🇽</span><span>México</span></div>
+    <div class="flag-card"><span>🇺🇸</span><span>EEUU</span></div>
+    <div class="flag-card"><span>🇨🇴</span><span>Colombia</span></div>
+    <div class="flag-card"><span>🇦🇷</span><span>Argentina</span></div>
+    <div class="flag-card"><span>🇨🇱</span><span>Chile</span></div>
+    <div class="flag-card"><span>🇵🇪</span><span>Perú</span></div>
+    <div class="flag-card"><span>🌍</span><span>Y más...</span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">STREAMS<span>GO</span></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <a href="privacidad.html" style="font-size:0.8rem;color:var(--muted);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--muted)'">Privacidad & Cookies</a>
+  </div>
+  <p>© 2025 StreamsGo · Pago seguro con Stripe 🔒</p>
+</footer>
+
+<script>
+  // Capacity banner toggle
+  let isFull = false;
+  function toggleCapacity() {
+    isFull = !isFull;
+    const banner = document.getElementById('capacityBanner');
+    const status = document.getElementById('capacityStatus');
+    const msg    = document.getElementById('capacityMsg');
+    const btn    = document.querySelector('.capacity-toggle');
+
+    if (isFull) {
+      banner.classList.add('full');
+      status.textContent = 'PLAZO LLENO';
+      msg.innerHTML = 'El cupo de pedidos para hoy está completo. <strong>No aceptamos nuevos pagos hasta que haya plazas libres.</strong> Vuelve a consultar esta página — en cuanto haya disponibilidad lo verás aquí.';
+      btn.textContent = 'Simular plazas libres';
+    } else {
+      banner.classList.remove('full');
+      status.textContent = 'PLAZAS LIBRES';
+      msg.innerHTML = 'Para garantizar la máxima calidad, limitamos los pedidos diarios. <strong>Ahora mismo hay plazas disponibles</strong> — puedes realizar tu pedido con total tranquilidad.';
+      btn.textContent = 'Simular cupo lleno';
+    }
+  }
+
+  // Intersection Observer for fade-in animations
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
